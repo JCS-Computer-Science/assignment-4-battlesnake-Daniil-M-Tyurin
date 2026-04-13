@@ -10,7 +10,9 @@
 // To get you started we've included code to prevent your Battlesnake from moving backwards.
 // For more info see docs.battlesnake.com
 import express from "express";
-import move from "./moveLogic.js";
+
+let gameState;
+let count = 0;
 
 const server = express();
 server.use(express.json());
@@ -32,14 +34,21 @@ server.get("/", (req, res) => {
 //      the request body will contain objects representing the game instance, game board state, and your snake
 //      https://docs.battlesnake.com/api/requests/start
 server.post("/start", (req, res) => {
+	console.log(req.query.board);
 	res.status(200).send();
+	
 })
 
 //TODO: respond to POST requests on "/move". Your response should be an object with a "move" property and optionally
 //      a "shout" property. The request body again contains objects representing the game state
 //      https://docs.battlesnake.com/api/requests/move
 server.post("/move", (req, res) => {
-	res.status(200).send();
+	let move = {
+		"move": "right",
+
+	}
+	res.status(200).send(move);
+	console.log(move);
 })
 
 //TODO: respond to POST requests on "/end", which signals the end of a game. Your response itself is ignored,
@@ -55,3 +64,4 @@ const port = process.env.PORT || 8000;
 server.listen(port, host, () => {
 	console.log(`Running Battlesnake at http://${host}:${port}...`);
 });
+
