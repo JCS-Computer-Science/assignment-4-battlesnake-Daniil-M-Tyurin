@@ -1,18 +1,6 @@
-// Welcome to
-// __________         __    __  .__                               __
-// \______   \_____ _/  |__/  |_|  |   ____   ______ ____ _____  |  | __ ____
-//  |    |  _/\__  \\   __\   __\  | _/ __ \ /  ___//    \\__  \ |  |/ // __ \
-//  |    |   \ / __ \|  |  |  | |  |_\  ___/ \___ \|   |  \/ __ \|    <\  ___/
-//  |________/(______/__|  |__| |____/\_____>______>___|__(______/__|__\\_____>
-//
-// This file can be a nice home for your Battlesnake logic and helper functions.
-//
-// To get you started we've included code to prevent your Battlesnake from moving backwards.
-// For more info see docs.battlesnake.com
+
 import express from "express";
 
-let gameState;
-let count = 0;
 
 const server = express();
 server.use(express.json());
@@ -24,38 +12,85 @@ const config = {
 	tail: "default", // TODO: Choose tail, see https://play.battlesnake.com/customizations/ for options unlocked in your account
 };
 
-//TODO: respond to GET requests on "/" with the config object above
 server.get("/", (req, res) => {
 	//console.log(config);
 	res.status(200).send(config);
 })
 
-//TODO: respond to POST requests on "/start". Your response itself is ignored, but must have status code "200"
-//      the request body will contain objects representing the game instance, game board state, and your snake
-//      https://docs.battlesnake.com/api/requests/start
+
 server.post("/start", (req, res) => {
-	console.log(req.query.board);
+	console.log(req.body.board);
 	res.status(200).send();
 	
 })
 
-//TODO: respond to POST requests on "/move". Your response should be an object with a "move" property and optionally
-//      a "shout" property. The request body again contains objects representing the game state
-//      https://docs.battlesnake.com/api/requests/move
-server.post("/move", (req, res) => {
-	let move = {
-		"move": "right",
 
+server.post("/move", (req, res) => {
+	let board = req.body.board
+	let snakesArr = board.snakes
+	let yourself = req.body.you
+	let snakesOthers = snakesArr.filter(snake => snake.id != yourself.id);
+	//Never eat soggy worms indexing (zero corresponds to up going clockwise);
+	let possibleMoveArr = [
+		1, 1, 1, 1
+	]
+	//Snake randomized movement just cuz, mostly for testing
+	possibleMoveArr = possibleMoveArr.map(value => value * (Math.random() * 0.9 + 0.1));
+
+	//check collision with wals
+	if(yourself.head.y + 1 === board.width){
+		possibleMoveArr[0] = 0;
+	}
+	if(yourself.head.x + 1 === board.width){
+		possibleMoveArr[1] = 0;
+	}
+	if(yourself.head.y - 1 === -1){
+		possibleMoveArr[2] = 0;
+	}
+	if(yourself.head.x -1 === -1){
+		possibleMoveArr[3] = 0;
+	}
+
+	//Check if collide with self
+	if (yourself.body.some(bodyElem => bodyElem.y === yourself.head.y + 1 && bodyElem.x === yourself.head.x)){
+		possibleMoveArr[0] = 0;
+	}
+	if (yourself.body.some(bodyElem => bodyElem.x === yourself.head.x + 1 && bodyElem.y === yourself.head.y)){
+		possibleMoveArr[1] = 0;
+	}
+	if (yourself.body.some(bodyElem => bodyElem.y === yourself.head.y - 1 && bodyElem.x === yourself.head.x)){
+		possibleMoveArr[2] = 0;
+	}
+	if (yourself.body.some(bodyElem => bodyElem.x === yourself.head.x - 1 && bodyElem.y === yourself.head.y)){
+		possibleMoveArr[3] = 0;
+	}
+	
+	//choose movement
+	let chosenMove;
+	let moveIndex = possibleMoveArr.indexOf(Math.max(...possibleMoveArr));
+	if (moveIndex === 0){
+		chosenMove = "up";
+	}
+	if (moveIndex === 1){
+		chosenMove = "right"
+	}
+	if (moveIndex === 2){
+		chosenMove = "down"
+	}
+	if (moveIndex === 3){
+		chosenMove = "left"
+	}
+	console.log(board);
+	let move = {
+		"move": chosenMove
 	}
 	res.status(200).send(move);
 	console.log(move);
 })
 
-//TODO: respond to POST requests on "/end", which signals the end of a game. Your response itself is ignored,
-//      but must have status code "200" the request body will contain objects representing the game
-//      https://docs.battlesnake.com/api/requests/end
+
 server.post("/end", (req, res) => {
-	res.status(200).send
+	res.status(200).send();
 })
 
 const host = "0.0.0.0";
