@@ -35,21 +35,42 @@ server.post("/move", (req, res) => {
 		1, 1, 1, 1
 	]
 	//Snake randomized movement just cuz, mostly for testing
-	possibleMoveArr = possibleMoveArr.map(value => value * (Math.random() * 0.9 + 0.1));
+	//possibleMoveArr = possibleMoveArr.map(value => value * (Math.random() * 0.9 + 0.1));
+
+	//Create a rudimentary flood fill function
+
+	//Create a weighting that increases the desireability of food
 
 	//check collision with wals
-	if(yourself.head.y + 1 === board.width){
+	if(yourself.head.y + 1 >= board.height){
 		possibleMoveArr[0] = 0;
 	}
-	if(yourself.head.x + 1 === board.width){
+	if(yourself.head.x + 1 >= board.width){
 		possibleMoveArr[1] = 0;
 	}
-	if(yourself.head.y - 1 === -1){
+	if(yourself.head.y - 1 < 0){
 		possibleMoveArr[2] = 0;
 	}
-	if(yourself.head.x -1 === -1){
+	if(yourself.head.x -1 < 0){
 		possibleMoveArr[3] = 0;
 	}
+
+	//Check collision with others
+	snakesOthers.forEach(snake => {
+		let body = snake.body;
+		if (body.some(elemBody => elemBody.x === yourself.head.x && elemBody.y === yourself.head.y + 1)){
+			possibleMoveArr[0] = 0;
+		}
+		if (body.some(elemBody => elemBody.y === yourself.head.y && elemBody.x === yourself.head.x + 1)){
+			possibleMoveArr[1] = 0;
+		}
+		if (body.some(elemBody => elemBody.x === yourself.head.x && elemBody.y === yourself.head.y - 1)){
+			possibleMoveArr[2] = 0;
+		}
+		if (body.some(elemBody => elemBody.y === yourself.head.y && elemBody.x === yourself.head.x - 1)){
+			possibleMoveArr[3] = 0;
+		}
+	})
 
 	//Check if collide with self
 	if (yourself.body.some(bodyElem => bodyElem.y === yourself.head.y + 1 && bodyElem.x === yourself.head.x)){
