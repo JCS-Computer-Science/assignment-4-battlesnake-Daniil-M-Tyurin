@@ -33,79 +33,34 @@ server.post("/move", (req, res) => {
 	//Never eat soggy worms indexing (zero corresponds to up going clockwise);
 	let possibleMoveArr = [
 		1, 1, 1, 1
-	]
+	];
+
 	//Snake randomized movement just cuz, mostly for testing
 	possibleMoveArr = possibleMoveArr.map(value => value * (Math.random() * 0.9 + 0.1));
 
 	//Create a rudimentary flood fill function
 
 	//Create a weighting that increases the desireability of food
-	if(yourself.health < 30){
-		let foodArr = board.food;
-		let distToFood = [];
-		let closestFoodIndex;
-		foodArr.forEach(food => {
-			let x = food.x;
-			let y = food.y;
-			let distance = Math.sqrt((yourself.head.x - x)**2 + (yourself.head.y - y)**2);
-			let pushedFood = {
-				x: x,
-				y: y,
-				distance: distance
-			}
-			distToFood.push(pushedFood);
-		})
-		//Figure this out
-		closestFoodIndex = distToFood.indexOf(Math.max(...distToFood.map(v => v.distance)));
-		let closestFood = distToFood[closestFoodIndex];
-		if (closestFood.x > yourself.head.x){
-			possibleMoveArr[1] = possibleMoveArr[1] * 10
-		}
-		if (closestFood.x < yourself.head.x){
-			possibleMoveArr[3] = possibleMoveArr[3] * 10
-		}
-		if (closestFood.y < yourself.head.y){
-			possibleMoveArr[2] = possibleMoveArr[2] * 10
-		}
-		if (closestFood.y > yourself.head.y){
-			possibleMoveArr[0] = possibleMoveArr[0] * 10
-		}
-		
-		
-	}
+	
 
 	//Check current collision with head
 	snakesOthers.forEach(snake => {
 		let head = snake.head;
-		if (head.x === yourself.head.x && (head.y === yourself.head.y + 1)){
+		if ((head.x === yourself.head.x && (head.y === yourself.head.y + 1)) || (head.x === yourself.head.x && (head.y - 1 === yourself.head.y + 1)) || (head.y === yourself.head.y + 1 && (head.x + 1 === yourself.head.x)) || (head.y === yourself.head.y + 1 && (head.x - 1 === yourself.head.x))){
 			possibleMoveArr[0] = 0;
 		}
-		if (head.y === yourself.head.y && (head.x === yourself.head.x + 1)){
+		if (head.y === yourself.head.y && (head.x === yourself.head.x + 1) || (head.y - 1 === yourself.head.y && (yourself.head.x + 1 === head.x)) || (yourself.head.x + 1 === head.x - 1 && (yourself.head.y === head.y)) || (yourself.head.y === head.y + 1 && (yourself.head.x + 1 === head.x)) ){
 			possibleMoveArr[1] = 0;
 		}
-		if (head.x === yourself.head.x && (head.y === yourself.head.y - 1)){
+		if (head.x === yourself.head.x && (head.y === yourself.head.y - 1) || (yourself.head.x === head.x + 1 && (yourself.head.y - 1 === head.y)) || (yourself.head.x === head.x && (yourself.head.y - 1 === head.y + 1)) || (yourself.head.x === head.x - 1 && (yourself.head.y - 1 === head.y))){
 			possibleMoveArr[2] = 0;
 		}
-		if (head.y === yourself.head.y && (head.x === yourself.head.x - 1)){
+		if (head.y === yourself.head.y && (head.x === yourself.head.x - 1) || (yourself.head.x - 1 === head.x && (yourself.head.y === head.y - 1)) || (yourself.head.x - 1 === head.x + 1 && (yourself.head.y === head.y)) || (yourself.head.y === head.y + 1 && (yourself.head.x - 1 === head.x))){
 			possibleMoveArr[3] = 0;
 		}
 	});
 	//Check future collisions witg geads
-	snakesOthers.forEach(snake => {
-		let head = snake.head;
-		if (head.x === yourself.head.x && head.y - 1 === yourself.head.y + 1){
-			possibleMoveArr[0] = possibleMoveArr[0] * .25;
-		}
-		if (head.y === yourself.head.y && (head.x -1  === yourself.head.x + 1)){
-			possibleMoveArr[1] = possibleMoveArr[1] * .25;
-		}
-		if (head.x === yourself.head.x && (head.y + 1 === yourself.head.y - 1)){
-			possibleMoveArr[2] = possibleMoveArr[2] * .25;
-		}
-		if (head.y === yourself.head.y && (head.x + 1 === yourself.head.x - 1)){
-			possibleMoveArr[3] = possibleMoveArr[3] * .25;
-		}
-	});
+	
 	//check collision with wals
 	if(yourself.head.y + 1 >= board.height){
 		possibleMoveArr[0] = 0;
@@ -118,6 +73,19 @@ server.post("/move", (req, res) => {
 	}
 	if(yourself.head.x -1 < 0){
 		possibleMoveArr[3] = 0;
+	}
+	//deter movement close to walls
+	if(yourself.head.y + 1 >= board.height - 1){
+		possibleMoveArr[0] = possibleMoveArr[0] * .01;
+	}
+	if(yourself.head.x + 1 >= board.width - 1){
+		possibleMoveArr[1] = possibleMoveArr[1] * .01;
+	}
+	if(yourself.head.y - 1 < 1){
+		possibleMoveArr[2] = possibleMoveArr[2] * .01;
+	}
+	if(yourself.head.x -1 < 1){
+		possibleMoveArr[3] = possibleMoveArr[3] * .01;
 	}
 
 	//Check collision with others
