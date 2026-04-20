@@ -36,13 +36,35 @@ server.post("/move", (req, res) => {
 	];
 
 	//Snake randomized movement just cuz, mostly for testing
-	possibleMoveArr = possibleMoveArr.map(value => value * (Math.random() * 0.9 + 0.1));
+	possibleMoveArr = possibleMoveArr.map(value => value * (Math.random() * 0.9 + 0.5));
 
 	//Create a rudimentary flood fill function
 
 	//Create a weighting that increases the desireability of food
-	
+	let distFoodArr = [];
+	let foodArr = board.food;
+	foodArr.forEach(food => {
+		let distX = (food.x - yourself.head.x) ** 2
+		let distY = (food.y - yourself.head.y) ** 2
+		let dist = Math.sqrt(distX + distY);
+		distFoodArr.push(dist)
+	})
+	let minFoodIndex = distFoodArr.indexOf(Math.min(...distFoodArr));
+	let xFood = foodArr[minFoodIndex].x
+	let yFood = foodArr[minFoodIndex].y
+	if (yourself.head.y < yFood){
+		possibleMoveArr[0] = possibleMoveArr[0] * 5
+	}
+	if (yourself.head.y > yFood){
+		possibleMoveArr[2] = possibleMoveArr[2] * 5
+	}
 
+	if (yourself.head.x < xFood){
+		possibleMoveArr[1] = possibleMoveArr[1] * 5
+	}
+	if (yourself.head.x > xFood){
+		possibleMoveArr[3] = possibleMoveArr[3] * 5
+	}
 	//Check current collision with head
 	snakesOthers.forEach(snake => {
 		let head = snake.head;
@@ -58,7 +80,11 @@ server.post("/move", (req, res) => {
 		if (head.y === yourself.head.y && (head.x === yourself.head.x - 1) || (yourself.head.x - 1 === head.x && (yourself.head.y === head.y - 1)) || (yourself.head.x - 1 === head.x + 1 && (yourself.head.y === head.y)) || (yourself.head.y === head.y + 1 && (yourself.head.x - 1 === head.x))){
 			possibleMoveArr[3] = 0;
 		}
+
+
 	});
+
+	
 	//Check future collisions witg geads
 	
 	//check collision with wals
@@ -81,6 +107,21 @@ server.post("/move", (req, res) => {
 	if(yourself.head.x + 1 >= board.width - 1){
 		possibleMoveArr[1] = possibleMoveArr[1] * .01;
 	}
+
+	if(yourself.head.y + 1 >= board.height - 2){
+		possibleMoveArr[0] = possibleMoveArr[0] * .3;
+	}
+	if(yourself.head.x + 1 >= board.width - 2){
+		possibleMoveArr[1] = possibleMoveArr[1] * .3;
+	}
+
+	if(yourself.head.y - 1 < 2){
+		possibleMoveArr[2] = possibleMoveArr[2] * .3;
+	}
+	if(yourself.head.x -1 < 2){
+		possibleMoveArr[3] = possibleMoveArr[3] * .3;
+	}
+
 	if(yourself.head.y - 1 < 1){
 		possibleMoveArr[2] = possibleMoveArr[2] * .01;
 	}
