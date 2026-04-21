@@ -53,17 +53,17 @@ server.post("/move", (req, res) => {
 	let xFood = foodArr[minFoodIndex].x
 	let yFood = foodArr[minFoodIndex].y
 	if (yourself.head.y < yFood){
-		possibleMoveArr[0] = possibleMoveArr[0] * 5
+		possibleMoveArr[0] = possibleMoveArr[0] * 3
 	}
 	if (yourself.head.y > yFood){
-		possibleMoveArr[2] = possibleMoveArr[2] * 5
+		possibleMoveArr[2] = possibleMoveArr[2] * 3
 	}
 
 	if (yourself.head.x < xFood){
-		possibleMoveArr[1] = possibleMoveArr[1] * 5
+		possibleMoveArr[1] = possibleMoveArr[1] * 3
 	}
 	if (yourself.head.x > xFood){
-		possibleMoveArr[3] = possibleMoveArr[3] * 5
+		possibleMoveArr[3] = possibleMoveArr[3] * 3
 	}
 	//Check current collision with head
 	snakesOthers.forEach(snake => {
@@ -81,7 +81,7 @@ server.post("/move", (req, res) => {
 			possibleMoveArr[3] = 0;
 		}
 
-		if (yourself.length >= snake.length){
+		if (yourself.length >= snake.length + 1){
 			if((head.x === yourself.head.x && (head.y - 1 === yourself.head.y + 1)) || (head.y === yourself.head.y + 1 && (head.x + 1 === yourself.head.x)) || (head.y === yourself.head.y + 1 && (head.x - 1 === yourself.head.x))){
 				possibleMoveArr[0] = possibleMoveArr[0] * 3
 			}
@@ -131,10 +131,10 @@ server.post("/move", (req, res) => {
 	}
 	//deter movement close to walls
 	if(yourself.head.y + 1 >= board.height - 1){
-		possibleMoveArr[0] = possibleMoveArr[0] * .01;
+		possibleMoveArr[0] = possibleMoveArr[0] * .1;
 	}
 	if(yourself.head.x + 1 >= board.width - 1){
-		possibleMoveArr[1] = possibleMoveArr[1] * .01;
+		possibleMoveArr[1] = possibleMoveArr[1] * .1;
 	}
 
 	if(yourself.head.y + 1 >= board.height - 2){
@@ -152,10 +152,10 @@ server.post("/move", (req, res) => {
 	}
 
 	if(yourself.head.y - 1 < 1){
-		possibleMoveArr[2] = possibleMoveArr[2] * .01;
+		possibleMoveArr[2] = possibleMoveArr[2] * .1;
 	}
 	if(yourself.head.x -1 < 1){
-		possibleMoveArr[3] = possibleMoveArr[3] * .01;
+		possibleMoveArr[3] = possibleMoveArr[3] * .1;
 	}
 
 	//Check collision with others
