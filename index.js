@@ -68,17 +68,46 @@ server.post("/move", (req, res) => {
 	//Check current collision with head
 	snakesOthers.forEach(snake => {
 		let head = snake.head;
-		if ((head.x === yourself.head.x && (head.y === yourself.head.y + 1)) || (head.x === yourself.head.x && (head.y - 1 === yourself.head.y + 1)) || (head.y === yourself.head.y + 1 && (head.x + 1 === yourself.head.x)) || (head.y === yourself.head.y + 1 && (head.x - 1 === yourself.head.x))){
+		if ((head.x === yourself.head.x && (head.y === yourself.head.y + 1))){
 			possibleMoveArr[0] = 0;
 		}
-		if (head.y === yourself.head.y && (head.x === yourself.head.x + 1) || (head.y - 1 === yourself.head.y && (yourself.head.x + 1 === head.x)) || (yourself.head.x + 1 === head.x - 1 && (yourself.head.y === head.y)) || (yourself.head.y === head.y + 1 && (yourself.head.x + 1 === head.x)) ){
+		if (head.y === yourself.head.y && (head.x === yourself.head.x + 1) ){
 			possibleMoveArr[1] = 0;
 		}
-		if (head.x === yourself.head.x && (head.y === yourself.head.y - 1) || (yourself.head.x === head.x + 1 && (yourself.head.y - 1 === head.y)) || (yourself.head.x === head.x && (yourself.head.y - 1 === head.y + 1)) || (yourself.head.x === head.x - 1 && (yourself.head.y - 1 === head.y))){
+		if (head.x === yourself.head.x && (head.y === yourself.head.y - 1)){
 			possibleMoveArr[2] = 0;
 		}
-		if (head.y === yourself.head.y && (head.x === yourself.head.x - 1) || (yourself.head.x - 1 === head.x && (yourself.head.y === head.y - 1)) || (yourself.head.x - 1 === head.x + 1 && (yourself.head.y === head.y)) || (yourself.head.y === head.y + 1 && (yourself.head.x - 1 === head.x))){
+		if (head.y === yourself.head.y && (head.x === yourself.head.x - 1)){
 			possibleMoveArr[3] = 0;
+		}
+
+		if (yourself.length >= snake.length){
+			if((head.x === yourself.head.x && (head.y - 1 === yourself.head.y + 1)) || (head.y === yourself.head.y + 1 && (head.x + 1 === yourself.head.x)) || (head.y === yourself.head.y + 1 && (head.x - 1 === yourself.head.x))){
+				possibleMoveArr[0] = possibleMoveArr[0] * 3
+			}
+			if((head.y - 1 === yourself.head.y && (yourself.head.x + 1 === head.x)) || (yourself.head.x + 1 === head.x - 1 && (yourself.head.y === head.y)) || (yourself.head.y === head.y + 1 && (yourself.head.x + 1 === head.x))){
+				possibleMoveArr[1] = possibleMoveArr[1] * 3
+			}
+			if((yourself.head.x === head.x + 1 && (yourself.head.y - 1 === head.y)) || (yourself.head.x === head.x && (yourself.head.y - 1 === head.y + 1)) || (yourself.head.x === head.x - 1 && (yourself.head.y - 1 === head.y))){
+				possibleMoveArr[2] = possibleMoveArr[2] * 3
+			}
+			if((yourself.head.x - 1 === head.x && (yourself.head.y === head.y - 1)) || (yourself.head.x - 1 === head.x + 1 && (yourself.head.y === head.y)) || (yourself.head.y === head.y + 1 && (yourself.head.x - 1 === head.x))){
+				possibleMoveArr[3] = possibleMoveArr[3] * 3
+			}
+		} else {
+			if((head.x === yourself.head.x && (head.y - 1 === yourself.head.y + 1)) || (head.y === yourself.head.y + 1 && (head.x + 1 === yourself.head.x)) || (head.y === yourself.head.y + 1 && (head.x - 1 === yourself.head.x))){
+				possibleMoveArr[0] = 0
+			}
+			if((head.y - 1 === yourself.head.y && (yourself.head.x + 1 === head.x)) || (yourself.head.x + 1 === head.x - 1 && (yourself.head.y === head.y)) || (yourself.head.y === head.y + 1 && (yourself.head.x + 1 === head.x))){
+				possibleMoveArr[1] = 0
+			}
+			if((yourself.head.x === head.x + 1 && (yourself.head.y - 1 === head.y)) || (yourself.head.x === head.x && (yourself.head.y - 1 === head.y + 1)) || (yourself.head.x === head.x - 1 && (yourself.head.y - 1 === head.y))){
+				possibleMoveArr[2] = 0
+			}
+			if((yourself.head.x - 1 === head.x && (yourself.head.y === head.y - 1)) || (yourself.head.x - 1 === head.x + 1 && (yourself.head.y === head.y)) || (yourself.head.y === head.y + 1 && (yourself.head.x - 1 === head.x))){
+				possibleMoveArr[3] = 0
+			}
+
 		}
 
 
@@ -132,6 +161,7 @@ server.post("/move", (req, res) => {
 	//Check collision with others
 	snakesOthers.forEach(snake => {
 		let body = snake.body;
+		snake.body.pop();
 		if (body.some(elemBody => elemBody.x === yourself.head.x && elemBody.y === yourself.head.y + 1)){
 			possibleMoveArr[0] = 0;
 		}
@@ -147,6 +177,7 @@ server.post("/move", (req, res) => {
 	})
 
 	//Check if collide with self
+	yourself.body.pop();
 	if (yourself.body.some(bodyElem => bodyElem.y === yourself.head.y + 1 && bodyElem.x === yourself.head.x)){
 		possibleMoveArr[0] = 0;
 	}
