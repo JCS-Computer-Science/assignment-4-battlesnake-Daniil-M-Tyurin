@@ -114,7 +114,20 @@ server.post("/move", (req, res) => {
 	});
 
 	
-	//Check future collisions witg geads
+	//Check future collisions using recursion
+	
+
+
+
+
+
+
+
+
+
+
+
+
 	
 	//check collision with wals
 	if(yourself.head.y + 1 >= board.height){
@@ -190,6 +203,47 @@ server.post("/move", (req, res) => {
 	if (yourself.body.some(bodyElem => bodyElem.x === yourself.head.x - 1 && bodyElem.y === yourself.head.y)){
 		possibleMoveArr[3] = 0;
 	}
+	//Checks for two tunnel look ahead weighting of only one to be lowered
+
+	let directions = [
+		{x: yourself.head.x, y: yourself.head.y + 1},
+		{x: yourself.head.x + 1, y: yourself.head.y},
+		{x: yourself.head.x, y: yourself.head.y - 1},
+		{x: yourself.head.x - 1, y: yourself.head.y}
+	]
+	directions.forEach((direct, i) => {
+		if (possibleMoveArr[i] === 0){
+			return;
+		}
+		let available = 0;
+		if(direct.y + 1 < board.height && !snakesArr.some(snake => snake.body.some(body => body.x === direct.x && body.y === direct.y + 1))){
+			available = available + 1;
+		}
+
+		if(direct.x + 1 < board.width && !snakesArr.some(snake => snake.body.some(body => body.x === direct.x + 1&& body.y === direct.y))){
+			available = available + 1;
+		}
+
+		if(direct.y - 1 >= 0 && !snakesArr.some(snake => snake.body.some(body => body.x === direct.x && body.y === direct.y - 1))){
+			available = available + 1;
+		}
+
+		if(direct.x - 1 >= 0 && !snakesArr.some(snake => snake.body.some(body => body.x === direct.x - 1 && body.y === direct.y))){
+			available = available + 1;
+		}
+
+		if(available === 0){
+			possibleMoveArr[i] = 0;
+		} else if (available === 1) {
+			possibleMoveArr[i] = possibleMoveArr[i] * 0.001
+		} else if (available === 2) {
+			possibleMoveArr[i] = possibleMoveArr[i] * 0.002
+		}
+	})
+
+
+
+
 	
 	//choose movement
 	let chosenMove;
