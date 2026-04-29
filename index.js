@@ -55,19 +55,50 @@ server.post("/move", (req, res) => {
 	let minFoodIndex = distFoodArr.indexOf(Math.min(...distFoodArr));
 	let xFood = foodArr[minFoodIndex].x
 	let yFood = foodArr[minFoodIndex].y
-	if (yourself.head.y < yFood){
-		possibleMoveArr[0] = possibleMoveArr[0] * 10
-	}
-	if (yourself.head.y > yFood){
-		possibleMoveArr[2] = possibleMoveArr[2] * 10
-	}
 
-	if (yourself.head.x < xFood){
-		possibleMoveArr[1] = possibleMoveArr[1] * 10
+	//Testing on differing food weightings based on length and hunger
+	if(yourself.length < 20){
+		if (yourself.head.y < yFood){
+			possibleMoveArr[0] = possibleMoveArr[0] * 10
+		}
+		if (yourself.head.y > yFood){
+			possibleMoveArr[2] = possibleMoveArr[2] * 10
+		}
+
+		if (yourself.head.x < xFood){
+			possibleMoveArr[1] = possibleMoveArr[1] * 10
+		}
+		if (yourself.head.x > xFood){
+			possibleMoveArr[3] = possibleMoveArr[3] * 10
+		}
+	} else if (yourself.health < 40){
+		if (yourself.head.x < xFood){
+			possibleMoveArr[1] = possibleMoveArr[1] * 7
+		}
+		if (yourself.head.x > xFood){
+			possibleMoveArr[3] = possibleMoveArr[3] * 7
+		}
+		if (yourself.head.y < yFood){
+			possibleMoveArr[0] = possibleMoveArr[0] * 7
+		}
+		if (yourself.head.y > yFood){
+			possibleMoveArr[2] = possibleMoveArr[2] * 7
+		}
+	} else {
+		if (yourself.head.x < xFood){
+			possibleMoveArr[1] = possibleMoveArr[1] * .5
+		}
+		if (yourself.head.x > xFood){
+			possibleMoveArr[3] = possibleMoveArr[3] * .5
+		}
+		if (yourself.head.y < yFood){
+			possibleMoveArr[0] = possibleMoveArr[0] * .5
+		}
+		if (yourself.head.y > yFood){
+			possibleMoveArr[2] = possibleMoveArr[2] * .5
+		}
 	}
-	if (yourself.head.x > xFood){
-		possibleMoveArr[3] = possibleMoveArr[3] * 10
-	}
+	
 	//Check current collision with head
 	snakesOthers.forEach(snake => {
 		let head = snake.head;
@@ -86,16 +117,16 @@ server.post("/move", (req, res) => {
 
 		if (yourself.length >= snake.length + 1){
 			if((head.x === yourself.head.x && (head.y - 1 === yourself.head.y + 1)) || (head.y === yourself.head.y + 1 && (head.x + 1 === yourself.head.x)) || (head.y === yourself.head.y + 1 && (head.x - 1 === yourself.head.x))){
-				possibleMoveArr[0] = possibleMoveArr[0] * 5
+				possibleMoveArr[0] = possibleMoveArr[0] * 50
 			}
 			if((head.y - 1 === yourself.head.y && (yourself.head.x + 1 === head.x)) || (yourself.head.x + 1 === head.x - 1 && (yourself.head.y === head.y)) || (yourself.head.y === head.y + 1 && (yourself.head.x + 1 === head.x))){
-				possibleMoveArr[1] = possibleMoveArr[1] * 5
+				possibleMoveArr[1] = possibleMoveArr[1] * 50
 			}
 			if((yourself.head.x === head.x + 1 && (yourself.head.y - 1 === head.y)) || (yourself.head.x === head.x && (yourself.head.y - 1 === head.y + 1)) || (yourself.head.x === head.x - 1 && (yourself.head.y - 1 === head.y))){
-				possibleMoveArr[2] = possibleMoveArr[2] * 5
+				possibleMoveArr[2] = possibleMoveArr[2] * 50
 			}
 			if((yourself.head.x - 1 === head.x && (yourself.head.y === head.y - 1)) || (yourself.head.x - 1 === head.x + 1 && (yourself.head.y === head.y)) || (yourself.head.y === head.y + 1 && (yourself.head.x - 1 === head.x))){
-				possibleMoveArr[3] = possibleMoveArr[3] * 5
+				possibleMoveArr[3] = possibleMoveArr[3] * 50
 			}
 		} else {
 			if((head.x === yourself.head.x && (head.y - 1 === yourself.head.y + 1)) || (head.y === yourself.head.y + 1 && (head.x + 1 === yourself.head.x)) || (head.y === yourself.head.y + 1 && (head.x - 1 === yourself.head.x))){
@@ -115,6 +146,24 @@ server.post("/move", (req, res) => {
 
 
 	});
+	//hazard collision deterent
+	if (board.hazards.length > 0 || board.hazards.length != null){
+		board.hazards.forEach(hazard => {
+			if(yourself.head.y + 1 === hazard.y && yourself.head.x === hazard.x){
+				possibleMoveArr[0] = possibleMoveArr[0] * 0.001;
+			}
+			if(yourself.head.x + 1 === hazard.x && yourself.head.y === hazard.y){
+				possibleMoveArr[1] = possibleMoveArr[1] * 0.001;
+			}
+			if(yourself.head.y - 1 === hazard.y && yourself.head.x === hazard.x){
+				possibleMoveArr[2] = possibleMoveArr[2] * 0.001;
+			}
+			if(yourself.head.x -1 === hazard.x && yourself.head.y === hazard.y){
+				possibleMoveArr[3] = possibleMoveArr[3] * 0.001;
+			}
+		});
+	}
+	
 	
 	//check collision with wals
 	if(yourself.head.y + 1 >= board.height){
@@ -131,31 +180,31 @@ server.post("/move", (req, res) => {
 	}
 	//deter movement close to walls
 	if(yourself.head.y + 1 >= board.height - 1){
-		possibleMoveArr[0] = possibleMoveArr[0] * .1;
-	}
-	if(yourself.head.x + 1 >= board.width - 1){
-		possibleMoveArr[1] = possibleMoveArr[1] * .1;
-	}
-
-	if(yourself.head.y + 1 >= board.height - 2){
 		possibleMoveArr[0] = possibleMoveArr[0] * .3;
 	}
-	if(yourself.head.x + 1 >= board.width - 2){
+	if(yourself.head.x + 1 >= board.width - 1){
 		possibleMoveArr[1] = possibleMoveArr[1] * .3;
 	}
 
+	if(yourself.head.y + 1 >= board.height - 2){
+		possibleMoveArr[0] = possibleMoveArr[0] * .8;
+	}
+	if(yourself.head.x + 1 >= board.width - 2){
+		possibleMoveArr[1] = possibleMoveArr[1] * .8;
+	}
+
 	if(yourself.head.y - 1 < 2){
-		possibleMoveArr[2] = possibleMoveArr[2] * .3;
+		possibleMoveArr[2] = possibleMoveArr[2] * .8;
 	}
 	if(yourself.head.x -1 < 2){
-		possibleMoveArr[3] = possibleMoveArr[3] * .3;
+		possibleMoveArr[3] = possibleMoveArr[3] * .8;
 	}
 
 	if(yourself.head.y - 1 < 1){
-		possibleMoveArr[2] = possibleMoveArr[2] * .1;
+		possibleMoveArr[2] = possibleMoveArr[2] * .3;
 	}
 	if(yourself.head.x -1 < 1){
-		possibleMoveArr[3] = possibleMoveArr[3] * .1;
+		possibleMoveArr[3] = possibleMoveArr[3] * .3;
 	}
 
 	//Check collision with others
@@ -173,6 +222,25 @@ server.post("/move", (req, res) => {
 		}
 		if (body.some(elemBody => elemBody.y === yourself.head.y && elemBody.x === yourself.head.x - 1)){
 			possibleMoveArr[3] = 0;
+		}
+	});
+
+	//PATHFIND OTHER SNAKES (EVIIIIIL FUNCTIONNNN) HAHAHAH
+	snakesOthers.forEach(snake => {
+		if (yourself.length > snake.length + 1){
+			if (yourself.head.y < snake.head.y){
+				possibleMoveArr[0] = possibleMoveArr[0] * 8.5
+			}
+			if (yourself.head.y > snake.head.y){
+				possibleMoveArr[2] = possibleMoveArr[2] * 8.5
+			}
+
+			if (yourself.head.x < snake.head.x){
+				possibleMoveArr[1] = possibleMoveArr[1] * 8.5
+			}
+			if (yourself.head.x > snake.head.x){
+				possibleMoveArr[3] = possibleMoveArr[3] * 8.5
+			}
 		}
 	})
 
@@ -210,7 +278,7 @@ server.post("/move", (req, res) => {
 		//console.log(needed.length)
 		while(needed.length > 0){
 			let playing = needed.shift();
-			console.log(playing)
+			//console.log(playing)
 			if(playing.x < 0 || playing.x >= board.width || playing.y < 0 || playing.y >= board.height){
 				continue;
 			}
@@ -258,7 +326,7 @@ server.post("/move", (req, res) => {
 		//console.log(spaceValue)
 
 		if (spaceValue < yourself.length){
-			possibleMoveArr[i] = possibleMoveArr[i] * 0.0001;
+			possibleMoveArr[i] = possibleMoveArr[i] * 0.000001;
 			return;
 		}
 		possibleMoveArr[i] = possibleMoveArr[i] * spaceValue;
